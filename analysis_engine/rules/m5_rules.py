@@ -12,6 +12,17 @@ from analysis_engine.rules.base import Rule
 
 _COLLECTION_NAME_HINTS = ("all", "list", "collect", "find_all", "get_all")
 
+# The mirror-image heuristic: function names signalling a deliberate
+# "return the first match" search, which is structurally identical in the
+# AST to the misconception this rule targets (return of a bare loop
+# variable, nothing outside the loop) but is actually idiomatic, correct
+# Python. Found as a genuine false positive during the Month 4 evaluation
+# sweep (e.g. `find_first_negative`). The rule can't tell intent from
+# structure alone, so -- consistent with how _COLLECTION_NAME_HINTS already
+# nudges confidence up -- a name in this list nudges it down instead of
+# fully suppressing, since the ambiguity is real either way.
+_SINGLE_MATCH_NAME_HINTS = ("find_first", "find_one", "search", "first_", "_first")
+
 
 class RM5_01_ReturnInsideAccumulationLoop(Rule):
     """
@@ -51,6 +62,9 @@ class RM5_01_ReturnInsideAccumulationLoop(Rule):
                         continue  # wrapped in an expression -> looks intentional, don't flag
                     if loop_var is not None and ret.value.id != loop_var:
                         continue
+
+                    if any(h in func_info.name.lower() for h in _SINGLE_MATCH_NAME_HINTS):
+                        continue  # deliberate search/find-first naming -- not this misconception
 
                     confidence = "HIGH" if any(
                         h in func_info.name.lower() for h in _COLLECTION_NAME_HINTS

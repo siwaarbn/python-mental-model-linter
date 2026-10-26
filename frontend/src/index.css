@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg-page: #faf7fb;
+  --bg-panel: #ffffff;
+  --bg-sunken: #f4f1f7;
+
+  --text-primary: #241f2e;
+  --text-secondary: #675f74;
+  --text-muted: #948c9e;
+
+  --accent: #7c3fd4;
+  --accent-soft: #efe6fb;
+  --accent-2: #2f8fd6;
+  --accent-2-soft: #e8f3fc;
+  --pink: #e0457b;
+  --pink-soft: #fdeaf1;
+  --amber: #e08a1f;
+  --amber-soft: #fdf1de;
+  --green: #0ca678;
+  --green-soft: #e3f7f0;
+
+  --gradient-hero: linear-gradient(120deg, #7c3fd4 0%, #e0457b 55%, #f08c00 100%);
+
+  --border: #e9e3ee;
+  --border-strong: #d3c9dc;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-voice: 'Source Serif 4', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+button {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+button:hover { background: var(--bg-sunken); }
+button:active { transform: scale(0.98); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #ffffff; }
+button.primary:hover { background: #235c63; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+input, select, textarea {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* --- Shared vivid-UI utilities ------------------------------------------ */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border-strong);
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.chip:hover { transform: translateY(-1px); }
+.chip.active {
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 3px 10px -3px rgba(0, 0, 0, 0.25);
+}
+
+.task-card {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  padding: 18px 20px 18px 22px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+  overflow: hidden;
+}
+.task-card::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 6px;
+  background: var(--card-accent, var(--accent));
+}
+.task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -14px rgba(36, 31, 46, 0.35);
+  border-color: var(--card-accent, var(--accent));
+}
+
+.hero-banner {
+  background: var(--gradient-hero);
+  border-radius: var(--radius-lg);
+  padding: 30px 32px;
+  color: #ffffff;
+  box-shadow: 0 14px 30px -18px rgba(124, 63, 212, 0.55);
+}
+
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid transparent;
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.pop-in { animation: pop-in 0.22s ease-out; }

@@ -9,6 +9,19 @@ import ast
 
 from analysis_engine.rules.base import Rule
 
+# Methods that mutate a container in place -- if the while-condition depends
+# on a variable that's never reassigned but IS mutated via one of these
+# (e.g. `while queue: queue.pop()`), the condition's truth value can change
+# even though no `=` targets that name. Missing this was a real false
+# positive found during the Month 4 evaluation sweep (see fp_sweep.py):
+# `while queue: item = queue.pop()` was flagged as a "condition never
+# changes" bug even though .pop() legitimately drains the queue every
+# iteration.
+_MUTATING_METHODS = frozenset({
+    "append", "extend", "insert", "remove", "pop", "clear",
+    "sort", "reverse", "update", "add", "discard", "popitem",
+})
+
 
 class RM4_01_StaticWhileCondition(Rule):
     """
@@ -34,7 +47,9 @@ class RM4_01_StaticWhileCondition(Rule):
                 continue  # state may change via a function call's side effects
 
             assigned_in_body = set(loop.body_assigned_names.keys())
-            if loop.test_names and loop.test_names.isdisjoint(assigned_in_body):
+            mutated_in_body = self._mutated_names(loop.node)
+            changed_names = assigned_in_body | mutated_in_body
+            if loop.test_names and loop.test_names.isdisjoint(changed_names):
                 names = ", ".join(sorted(loop.test_names))
                 findings.append(self._finding(
                     loop.node,
@@ -45,6 +60,21 @@ class RM4_01_StaticWhileCondition(Rule):
                     evidence=names,
                 ))
         return findings
+
+    @staticmethod
+    def _mutated_names(loop_node) -> set:
+        """Names mutated via an in-place method call (e.g. `queue.pop()`)
+        anywhere in the loop body -- these change a variable's truthiness
+        without ever appearing as an Assign target, so they must count as
+        "changing" the variable for termination purposes."""
+        mutated = set()
+        for node in ast.walk(loop_node):
+            if (isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Attribute)
+                    and isinstance(node.func.value, ast.Name)
+                    and node.func.attr in _MUTATING_METHODS):
+                mutated.add(node.func.value.id)
+        return mutated
 
 
 class RM4_02_OffByOneInRange(Rule):

@@ -106,19 +106,68 @@ class RM8_02_MutatorCallAsValueProducingSubExpression(Rule):
 
     def check(self, context) -> list:
         findings = []
+        assign_scope = self._build_assign_scope_map(context)
+        scope_by_node = self._build_node_scope_map(context)
+
         for node in ast.walk(context.tree):
             for child_field, child in self._value_producing_children(node):
                 if _is_none_returning_mutator_call(child):
                     method = child.func.attr
-                    findings.append(self._finding(
+                    receiver = child.func.value
+
+                    # Same type-confirmation caveat as R-M8-01: a user-defined
+                    # class can legitimately have a same-named method (e.g. a
+                    # fluent `.add()` that returns `self`) that isn't a real
+                    # None-returning mutator at all. Found as a genuine false
+                    # positive during the Month 4 evaluation sweep -- this
+                    # previously always reported HIGH confidence regardless of
+                    # whether the receiver's type was actually confirmed as a
+                    # builtin list/dict/set.
+                    scope = scope_by_node.get(id(node), context.module_scope)
+                    type_confirmed = (
+                        isinstance(receiver, ast.Name)
+                        and context.inferred_types.get((id(scope), receiver.id)) in
+                        ("list", "dict", "set")
+                    )
+
+                    finding = self._finding(
                         child,
                         f"'.{method}()' mutates in place and returns None, "
                         f"but its result is used here as though it produced "
                         f"a value — this expression will always evaluate to "
                         f"None.",
                         evidence=method,
-                    ))
+                    )
+                    finding.confidence = "HIGH" if type_confirmed else "MEDIUM"
+                    findings.append(finding)
         return findings
+
+    @staticmethod
+    def _build_assign_scope_map(context) -> dict:
+        mapping = {}
+        for scope in context.scopes:
+            for assigns in scope.assigned_names.values():
+                for assign in assigns:
+                    mapping[id(assign)] = scope
+        return mapping
+
+    @staticmethod
+    def _build_node_scope_map(context) -> dict:
+        """Maps every node inside a function body to that function's scope
+        (by line range), falling back to module scope -- used so the type
+        lookup below checks the receiver's type in the scope it's actually
+        used in, same as R-M8-01 does via its assign-specific scope map."""
+        mapping = {}
+        for func_info in context.functions.values():
+            start = getattr(func_info.node, "lineno", None)
+            end = getattr(func_info.node, "end_lineno", start)
+            if start is None:
+                continue
+            for node in ast.walk(func_info.node):
+                line = getattr(node, "lineno", None)
+                if line is not None and start <= line <= end:
+                    mapping[id(node)] = func_info.scope
+        return mapping
 
     @staticmethod
     def _value_producing_children(node):

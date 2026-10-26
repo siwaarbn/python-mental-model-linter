@@ -94,6 +94,18 @@ class RM7_02_PrematureAccumulatorRead(Rule):
                 if not self._read_after_loop(loop.scope, var, loop_end_line):
                     continue
 
+                # Documented false-positive mitigation: printing the running
+                # value inside the loop for debugging/progress output is
+                # legitimate and common -- this was previously documented
+                # but never actually implemented (found during the Month 4
+                # evaluation sweep), so a plain debug-print pattern like
+                # `total += n; print(total)` was flagged indistinguishably
+                # from a genuine mistake. Suppressed outright rather than
+                # just downgrading confidence, since the frontend doesn't
+                # currently filter findings by confidence level.
+                if self._feeds_print_call(loop.node, inside_read):
+                    continue
+
                 finding = self._finding(
                     inside_read,
                     f"'{var}' is read inside the loop, on the same iteration "
@@ -104,6 +116,18 @@ class RM7_02_PrematureAccumulatorRead(Rule):
                 )
                 findings.append(finding)
         return findings
+
+    @staticmethod
+    def _feeds_print_call(loop_node, read_node) -> bool:
+        """True if `read_node` is (an argument of) a call to print()
+        anywhere in the loop body."""
+        for node in ast.walk(loop_node):
+            if (isinstance(node, ast.Call)
+                    and isinstance(node.func, ast.Name)
+                    and node.func.id == "print"):
+                if any(arg is read_node for arg in node.args):
+                    return True
+        return False
 
     @staticmethod
     def _read_inside_loop(loop, var):

@@ -101,6 +101,16 @@ def test_rm4_01_does_not_flag_when_body_updates_condition_var():
     assert len(_findings("i = 0\nwhile i < 5:\n    i = i + 1\n", "R-M4-01")) == 0
 
 
+def test_rm4_01_does_not_flag_when_body_mutates_condition_var_via_method():
+    """
+    Month 4 evaluation fix: `while queue: queue.pop()` was previously a
+    false positive because .pop() changes the loop's truthiness without
+    ever appearing as an Assign target.
+    """
+    src = "queue = [1, 2, 3]\nwhile queue:\n    item = queue.pop()\n    print(item)\n"
+    assert len(_findings(src, "R-M4-01")) == 0
+
+
 def test_rm4_02_flags_off_by_one_index():
     src = "items = [1, 2, 3]\nfor i in range(3):\n    print(items[3])\n"
     assert len(_findings(src, "R-M4-02")) == 1
@@ -125,6 +135,19 @@ def test_rm5_01_flags_return_inside_loop_named_get_all():
 
 def test_rm5_01_does_not_flag_wrapped_return_expression():
     src = "def first_even(nums):\n    for n in nums:\n        return n if n % 2 == 0 else None\n"
+    assert len(_findings(src, "R-M5-01")) == 0
+
+
+def test_rm5_01_does_not_flag_find_first_style_naming():
+    """
+    Month 4 evaluation fix: `find_first_negative` with no trailing return
+    is a correct, idiomatic search-and-return-early pattern, structurally
+    identical to the misconception this rule targets. Suppressed based on
+    the function name signalling deliberate single-match search intent --
+    mirroring how _COLLECTION_NAME_HINTS already raises confidence for the
+    opposite intent.
+    """
+    src = "def find_first_negative(nums):\n    for n in nums:\n        if n < 0:\n            return n\n"
     assert len(_findings(src, "R-M5-01")) == 0
 
 
@@ -238,6 +261,20 @@ def test_rm7_02_does_not_flag_when_only_read_after_loop():
     assert len(_findings(src, "R-M7-02")) == 0
 
 
+def test_rm7_02_does_not_flag_debug_print_inside_loop():
+    """
+    Month 4 evaluation fix: the docstring always promised a lower
+    confidence for a print()-fed read inside the loop, but the check
+    never actually implemented it -- `total += n; print(total)` was
+    flagged indistinguishably from a genuine premature-read mistake.
+    Now suppressed outright, since printing a running value is a
+    common, legitimate pattern and the frontend doesn't filter by
+    confidence.
+    """
+    src = "total = 0\nfor n in [1, 2, 3]:\n    total += n\n    print(total)\nprint(total)\n"
+    assert len(_findings(src, "R-M7-02")) == 0
+
+
 # ---- R-M8-01 / R-M8-02 --------------------------------------------------
 
 def test_rm8_01_flags_reassignment_of_sort_result():
@@ -260,6 +297,40 @@ def test_rm8_02_flags_sort_call_as_print_argument():
 def test_rm8_02_does_not_flag_normal_statement_level_call():
     src = "my_list = [3, 1, 2]\nmy_list.sort()\nprint(my_list)\n"
     assert len(_findings(src, "R-M8-02")) == 0
+
+
+def test_rm8_02_lowers_confidence_when_type_not_confirmed():
+    """
+    Month 4 evaluation fix: R-M8-02 previously always reported HIGH
+    confidence regardless of type inference, unlike its sibling R-M8-01.
+    A user-defined class with a same-named method (e.g. a fluent `.add()`
+    returning `self`) is a real false-positive risk this brings back in
+    line with R-M8-01's documented, already-accepted behavior.
+    """
+    src = (
+        "class Cart:\n"
+        "    def __init__(self):\n"
+        "        self.items = []\n"
+        "    def add(self, item):\n"
+        "        self.items.append(item)\n"
+        "        return self\n"
+        "\n"
+        "def describe(cart):\n"
+        "    return str(cart.items)\n"
+        "\n"
+        "c = Cart()\n"
+        "print(describe(c.add('apple')))\n"
+    )
+    findings = _findings(src, "R-M8-02")
+    assert len(findings) == 1
+    assert findings[0].confidence == "MEDIUM"
+
+
+def test_rm8_02_keeps_high_confidence_when_type_confirmed():
+    src = "items = []\ndef wrap(x):\n    return x\nprint(wrap(items.append(1)))\n"
+    findings = _findings(src, "R-M8-02")
+    assert len(findings) == 1
+    assert findings[0].confidence == "HIGH"
 
 
 # ---- R-M9-01 / R-M9-02 --------------------------------------------------
