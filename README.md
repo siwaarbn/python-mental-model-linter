@@ -1,6 +1,6 @@
-# Misconception Detection for Python Beginners
+# Python Mental Model Linter
 
-A feedback tool that finds the wrong *belief* behind a beginner's Python mistake, not just the broken line, and explains it step by step.
+A linter for how beginners *think* about Python. It finds the wrong belief behind a mistake, not just the broken line, and explains it step by step.
 
 Built for my Bachelor thesis at TU Darmstadt: *Identification and Reduction of Misconceptions in Programming Novices through Automated Code Analysis and Feedback-Based Support* (2026).
 
