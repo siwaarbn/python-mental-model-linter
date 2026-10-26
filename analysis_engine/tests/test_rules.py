@@ -185,6 +185,11 @@ def test_rm5_02_flags_print_only_function_used_for_value():
     assert len(_findings(src, "R-M5-02")) == 1
 
 
+def test_rm5_02_does_not_flag_print_only_function_called_as_statement():
+    src = "def show(x):\n    print(x * 2)\nshow(5)\n"
+    assert len(_findings(src, "R-M5-02")) == 0
+
+
 def test_rm5_03_flags_unreachable_statement():
     assert len(_findings("def f():\n    return 1\n    print('never')\n", "R-M5-03")) == 1
 
