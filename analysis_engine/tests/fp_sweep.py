@@ -15,6 +15,9 @@ CASES = [
     ("R-M1-01", "legit: last-value tracking used as scalar afterward, not a collection",
      "best = 0\nfor score in [3, 9, 1]:\n    best = score\nprint(best)\n"),
 
+    ("R-M1-02", "legit: list rebuilt on purpose each iteration and used inside the loop",
+     "row = []\nfor i in range(3):\n    row = [i, i * 2]\n    print(row)\n"),
+
     ("R-M2-01", "legit: intentional shared reference (aliasing on purpose)",
      "log = []\nrecent = log\nrecent.append('start')\nprint(log)\n"),
 

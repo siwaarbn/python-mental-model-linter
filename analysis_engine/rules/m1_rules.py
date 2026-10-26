@@ -130,6 +130,8 @@ class RM1_02_ListAccumulationWithoutAppend(Rule):
                 for assign in assigns_in_loop:
                     if self._is_legitimate_accumulation(assign.value, var):
                         continue
+                    if self._is_deliberate_rebuild(loop, var, assign.value):
+                        continue
                     findings.append(self._finding(
                         assign,
                         f"'{var}' was created as an empty list, but inside the loop "
@@ -148,6 +150,18 @@ class RM1_02_ListAccumulationWithoutAppend(Rule):
             return False  # must be initialised BEFORE the loop
         value = first.value
         return isinstance(value, ast.List) and len(value.elts) == 0
+
+    @staticmethod
+    def _is_deliberate_rebuild(loop, var, value) -> bool:
+        """A new list built on every iteration and never read after the
+        loop, e.g. `row = [i, i * 2]` used only inside the loop body. The
+        misconception expects the list to hold every value after the loop,
+        so without a later read there is nothing to suggest it."""
+        if not isinstance(value, (ast.List, ast.ListComp)):
+            return False
+        loop_end = getattr(loop.node, "end_lineno", 0)
+        return not any(getattr(n, "lineno", 0) > loop_end
+                       for n in loop.scope.read_names.get(var, []))
 
     @staticmethod
     def _is_legitimate_accumulation(value: ast.AST, var: str) -> bool:

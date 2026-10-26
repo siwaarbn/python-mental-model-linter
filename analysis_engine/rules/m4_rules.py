@@ -46,7 +46,9 @@ class RM4_01_StaticWhileCondition(Rule):
             if any(isinstance(n, ast.Call) for n in ast.walk(test)):
                 continue  # state may change via a function call's side effects
 
-            assigned_in_body = set(loop.body_assigned_names.keys())
+            # Both `n = n + 1` and `n += 1` change the condition variable.
+            assigned_in_body = (set(loop.body_assigned_names.keys())
+                                | set(loop.body_aug_assigned_names.keys()))
             mutated_in_body = self._mutated_names(loop.node)
             changed_names = assigned_in_body | mutated_in_body
             if loop.test_names and loop.test_names.isdisjoint(changed_names):
