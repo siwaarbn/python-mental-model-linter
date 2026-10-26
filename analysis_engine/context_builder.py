@@ -2,8 +2,6 @@
 context_builder.py
 ===================
 
-Component 2 of the Month 2 Analysis Engine (Option C architecture).
-
 Why this exists
 ----------------
 Every rule matcher needs to answer questions like "was this variable
@@ -11,14 +9,13 @@ first assigned a list literal?", "does this while-loop's test reference
 anything the body ever changes?", or "does this function have a return
 statement anywhere?". If each of the 22 rules re-walked the AST to
 answer these questions itself, that is one full tree traversal per
-rule (Option B — rejected). Instead, this module does exactly ONE
+rule. Instead, this module does exactly ONE
 traversal of the tree and builds a shared, read-only "context" object.
 Every rule matcher (rules/*.py) only ever reads from this context; it
 never touches the raw AST itself.
 
-This is the single-pass context builder half of Option C. The
-Strategy/plugin half (independent rule matchers, run by registry.py)
-consumes what this module produces.
+The rules in rules/ (run by registry.py) consume what this module
+produces.
 
 What it tracks
 ---------------
@@ -30,8 +27,8 @@ What it tracks
   print() calls.
 - A light type-tracking pass: for every name, what kind of value it
   was FIRST assigned (list / dict / set / str / int / float / bool /
-  None / unknown). This is the "AST + light type tracking" method the
-  Month 1 taxonomy specifies for M2, M8 and M11.
+  None / unknown). Rules for M2, M8 and M11 use it to check whether a
+  variable holds a built-in container.
 - Flat, whole-file lists (all Assign nodes, all Name nodes, all Call
   nodes by callee name) for rules that need a global rather than a
   scoped view (e.g. R-M6-03's cross-call-site analysis).

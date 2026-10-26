@@ -1,7 +1,7 @@
 /**
  * Single source of truth for misconception display labels + colors.
  * Used by Home (category filter + task cards), StudentWorkspace (feedback
- * accents), and InstructorDashboard (charts, roster, Hinweise) so the same
+ * accents), and InstructorDashboard (charts, roster, suggestions) so the same
  * M-code always reads as the same color everywhere in the app.
  */
 export interface MisconceptionMeta {

@@ -2,7 +2,7 @@
 feedback
 ========
 
-Component 4 of the Month 2 pipeline: the Feedback Generator.
+The feedback generator.
 
 Maps a Finding (produced by registry.py) to a four-layer feedback card:
   Layer 1 — Observation:              what the analysis engine noticed

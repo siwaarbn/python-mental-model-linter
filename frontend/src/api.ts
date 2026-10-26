@@ -7,7 +7,7 @@ import type {
   ClassAnalytics,
   StudentProgress,
   StudentSummary,
-  HinweisItem,
+  SuggestionItem,
 } from "./types";
 
 const BASE = import.meta.env.VITE_API_BASE ?? "http://127.0.0.1:8000";
@@ -25,7 +25,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  health: () => request<{ status: string; analysis_engine_connected: boolean }>("/api/health"),
+  health: () => request<{ status: string }>("/api/health"),
 
   createUser: (display_name: string, role: "student" | "instructor" = "student") =>
     request<User>("/api/users", {
@@ -55,5 +55,5 @@ export const api = {
   instructorStudentProgress: (userId: number) =>
     request<StudentProgress>(`/api/instructor/students/${userId}/progress`),
 
-  instructorHinweise: () => request<HinweisItem[]>("/api/instructor/hinweise"),
+  instructorSuggestions: () => request<SuggestionItem[]>("/api/instructor/suggestions"),
 };

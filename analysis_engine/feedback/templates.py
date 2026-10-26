@@ -2,8 +2,8 @@
 templates.py
 ============
 
-The feedback template library. One entry per misconception (M1-M11),
-matching the finalized Month 1 taxonomy. Each template supplies
+The feedback template library, one entry per misconception (M1-M11).
+Each template supplies
 severity and Layers 2-4 (Layer 1 always comes from the Finding's own
 `message`, since that's specific to what was actually found in THIS
 submission — Layers 2-4 are the same for every student who trips the

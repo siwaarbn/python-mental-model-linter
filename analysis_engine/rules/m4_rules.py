@@ -9,14 +9,9 @@ import ast
 
 from analysis_engine.rules.base import Rule
 
-# Methods that mutate a container in place -- if the while-condition depends
-# on a variable that's never reassigned but IS mutated via one of these
-# (e.g. `while queue: queue.pop()`), the condition's truth value can change
-# even though no `=` targets that name. Missing this was a real false
-# positive found during the Month 4 evaluation sweep (see fp_sweep.py):
-# `while queue: item = queue.pop()` was flagged as a "condition never
-# changes" bug even though .pop() legitimately drains the queue every
-# iteration.
+# Methods that mutate a container in place. If the while-condition depends
+# on a variable that is never reassigned but is mutated by one of these
+# (e.g. `while queue: queue.pop()`), the condition can still change.
 _MUTATING_METHODS = frozenset({
     "append", "extend", "insert", "remove", "pop", "clear",
     "sort", "reverse", "update", "add", "discard", "popitem",

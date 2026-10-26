@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { api } from "../api";
-import type { ClassAnalytics, User, StudentSummary, StudentProgress, HinweisItem } from "../types";
+import type { ClassAnalytics, User, StudentSummary, StudentProgress, SuggestionItem } from "../types";
 import { ProgressPanel } from "../components/ProgressPanel";
 
 type View = "analytics" | "students";
@@ -15,13 +15,13 @@ export function InstructorDashboard({ user }: { user: User }) {
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [studentProgress, setStudentProgress] = useState<StudentProgress | null>(null);
 
-  const [hinweise, setHinweise] = useState<HinweisItem[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     api.instructorAnalytics().then(setData);
     api.instructorStudents().then(setStudents);
-    api.instructorHinweise().then(setHinweise).catch(() => {});
+    api.instructorSuggestions().then(setSuggestions).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export function InstructorDashboard({ user }: { user: User }) {
     api.instructorStudentProgress(selectedStudentId).then(setStudentProgress).catch(() => {});
   }, [selectedStudentId]);
 
-  const visibleHinweise = hinweise.filter((h) => !dismissed.has(h.id));
+  const visibleSuggestions = suggestions.filter((h) => !dismissed.has(h.id));
 
   if (!data) {
     return <div style={{ padding: 28 }}>Loading analytics&hellip;</div>;
@@ -50,10 +50,10 @@ export function InstructorDashboard({ user }: { user: User }) {
         <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>{user.display_name}</span>
       </div>
 
-      {visibleHinweise.length > 0 && (
+      {visibleSuggestions.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {visibleHinweise.map((h) => (
-            <HinweisCard key={h.id} item={h} onDismiss={() => setDismissed((prev) => new Set(prev).add(h.id))} />
+          {visibleSuggestions.map((h) => (
+            <SuggestionCard key={h.id} item={h} onDismiss={() => setDismissed((prev) => new Set(prev).add(h.id))} />
           ))}
         </div>
       )}
@@ -210,7 +210,7 @@ export function InstructorDashboard({ user }: { user: User }) {
   );
 }
 
-function HinweisCard({ item, onDismiss }: { item: HinweisItem; onDismiss: () => void }) {
+function SuggestionCard({ item, onDismiss }: { item: SuggestionItem; onDismiss: () => void }) {
   const isReteach = item.type === "reteach";
   const accent = isReteach ? "var(--amber)" : "var(--green)";
   const soft = isReteach ? "var(--amber-soft)" : "var(--green-soft)";

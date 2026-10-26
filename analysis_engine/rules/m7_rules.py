@@ -94,15 +94,8 @@ class RM7_02_PrematureAccumulatorRead(Rule):
                 if not self._read_after_loop(loop.scope, var, loop_end_line):
                     continue
 
-                # Documented false-positive mitigation: printing the running
-                # value inside the loop for debugging/progress output is
-                # legitimate and common -- this was previously documented
-                # but never actually implemented (found during the Month 4
-                # evaluation sweep), so a plain debug-print pattern like
-                # `total += n; print(total)` was flagged indistinguishably
-                # from a genuine mistake. Suppressed outright rather than
-                # just downgrading confidence, since the frontend doesn't
-                # currently filter findings by confidence level.
+                # Printing a running total as progress output is a common,
+                # correct pattern, so reads inside print() are skipped.
                 if self._feeds_print_call(loop.node, inside_read):
                     continue
 

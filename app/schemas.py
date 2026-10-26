@@ -146,7 +146,7 @@ class StudentSummary(BaseModel):
     last_active: Optional[datetime] = None
 
 
-class HinweisItem(BaseModel):
+class SuggestionItem(BaseModel):
     id: str
     type: str  # "reteach" (misconception is widespread) | "extend" (student(s) ready to go further)
     misconception_id: Optional[str] = None

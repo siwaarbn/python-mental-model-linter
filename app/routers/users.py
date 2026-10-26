@@ -12,7 +12,8 @@ def create_user(payload: schemas.UserCreate, db: Session = Depends(get_db)):
     """
     Lightweight identity, not a real account: a student or instructor
     enters a name once and gets an id back to use for the rest of the
-    session. No password -- see backend/README.md for the reasoning.
+    session. There is no password: the prototype focuses on analysis and
+    feedback, not account management.
     """
     existing = (
         db.query(models.User)

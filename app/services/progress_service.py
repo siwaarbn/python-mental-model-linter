@@ -5,9 +5,8 @@ Deliberately computed on the fly from Submission/Finding rows rather than
 stored -- there is no new DB table here, so nothing needs migrating and the
 numbers are always consistent with the raw findings. The one thing this
 module intentionally does NOT do is compare students to each other: every
-metric here is self-referenced (a student's own history), in line with the
-"private streaks, not leaderboards" decision -- see the leaderboard research
-notes in the Month 3/4 supervisor discussion for why.
+metric here is self-referenced (a student's own history), so streaks stay
+private and there is no leaderboard.
 
 Three ideas this module encodes:
 
@@ -173,8 +172,7 @@ def _generate_heuristic_summary(
 ) -> str:
     """
     Deterministic fallback summary -- used whenever a real model call isn't
-    configured (see generate_ai_summary below), and good enough to ship on
-    its own if you'd rather not wire up a live API call for the thesis demo.
+    configured (see generate_ai_summary below).
     """
     if tasks_attempted == 0:
         return f"{display_name} hasn't submitted anything yet."
@@ -310,8 +308,8 @@ def compute_student_progress(
 # --- Curated extension suggestions ------------------------------------------
 # Static, instructor-curated mapping from a mastered misconception to a
 # next-step suggestion. Deliberately NOT AI-generated: an LLM shouldn't be
-# inventing exercise names or video links, so this is the one place a human
-# (you, or Svana) should edit directly as the task bank grows.
+# inventing exercise names or links, so this mapping is edited by hand as
+# the task bank grows.
 EXTENSION_SUGGESTIONS: dict[str, str] = {
     "M1": "Try a task that requires building up a running total or list across loop iterations, to reinforce the accumulator pattern that fixes this.",
     "M2": "Introduce a task involving mutable default arguments -- it builds on the same reference-vs-value distinction from a new angle.",

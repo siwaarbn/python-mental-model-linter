@@ -155,7 +155,7 @@ The *My progress* view shows a short summary generated from templates. If `ANTHR
 | `GET` | `/api/users/{id}/progress` | A student's progress, streaks and badges |
 | `GET` | `/api/instructor/analytics` | Class-wide misconception frequency |
 | `GET` | `/api/instructor/students` | All students with a summary |
-| `GET` | `/api/instructor/hinweise` | Suggestions on what to teach again |
+| `GET` | `/api/instructor/suggestions` | Suggestions on what to teach again or extend |
 
 ## Project structure
 

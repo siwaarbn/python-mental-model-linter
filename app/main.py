@@ -5,7 +5,6 @@ from app.database import Base, engine, SessionLocal
 from app import models
 from app.seed_data import TASKS
 from app.routers import users, tasks, submissions, instructor, progress
-from app.services.analysis_service import ENGINE_AVAILABLE
 
 app = FastAPI(title="Misconception Feedback API", version="1.0.0")
 
@@ -28,13 +27,6 @@ app.include_router(progress.router)
 def on_startup():
     Base.metadata.create_all(bind=engine)
     _seed_tasks_if_empty()
-    if not ENGINE_AVAILABLE:
-        print(
-            "\n"
-            "  ! analysis_engine not found -- serving STUB feedback only.\n"
-            "  Drop your Month 2 analysis_engine/ folder into backend/analysis_engine/\n"
-            "  and restart. See backend/README.md.\n"
-        )
 
 
 def _seed_tasks_if_empty():
@@ -50,4 +42,4 @@ def _seed_tasks_if_empty():
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "analysis_engine_connected": ENGINE_AVAILABLE}
+    return {"status": "ok"}

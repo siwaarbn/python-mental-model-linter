@@ -4,7 +4,7 @@ pipeline.py
 
 The single function a caller (API layer, CLI, or a test) actually
 needs: give it source code, get back either a parse error or a list of
-FeedbackCards. Wires together every Month 2 component in order:
+FeedbackCards. Runs every stage in order:
 
     parse_source -> build_context -> run_all_rules -> FeedbackGenerator
 """

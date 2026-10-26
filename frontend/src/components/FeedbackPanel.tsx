@@ -2,11 +2,9 @@ import { useState } from "react";
 import type { FeedbackCard } from "../types";
 
 /**
- * Plain-language headings, chosen with the supervisor's feedback in mind:
- * no "Layer 1/2/3/4" model framing, no rule IDs, no confidence/severity
- * jargon on screen. The underlying four-layer structure (Narciss /
- * Sorva) is still exactly what drives the sequence -- it's just not
- * exposed as a numbered technical model anymore.
+ * Plain-language headings for the four feedback layers (Observation,
+ * Conceptual Explanation, Mental Model Correction, Reflection Prompt).
+ * Rule IDs, confidence and severity are not shown to students.
  */
 const LAYER_HEADINGS = [
   "What happened",

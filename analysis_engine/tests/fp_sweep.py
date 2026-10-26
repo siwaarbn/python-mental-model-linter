@@ -1,12 +1,11 @@
 """
 False-positive sweep: for each of the 22 rules, run one or more pieces of
 CORRECT/idiomatic Python through the real pipeline and report any finding
-that fires anyway. Not a replacement for the existing 74 unit tests --
-those already check "rule fires on bad code" and a few "doesn't fire on
-obviously safe code" cases per rule. This script specifically hunts for
-plausible real-world code that LOOKS like the misconception pattern but
-isn't one, guided by the "False Positive Risk" notes already documented
-in the rule docstrings plus structural reading of each rule's check().
+that fires anyway. It complements the unit tests in test_rules.py by
+using plausible real-world code that looks like a rule's pattern but is
+correct, guided by the "False Positive Risk" notes in the rule docstrings.
+
+Run with: python -m analysis_engine.tests.fp_sweep
 """
 from analysis_engine.pipeline import analyze
 

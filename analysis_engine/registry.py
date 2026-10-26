@@ -2,17 +2,14 @@
 registry.py
 ===========
 
-Component 3 of the Month 2 pipeline: the Rule Engine.
+The rule engine.
 
 This is deliberately thin. It knows nothing about how any individual
 rule detects a misconception — it just holds the list of every
 registered Rule instance, runs each one's check() against the shared
 SubmissionContext built by context_builder.py, and collects the
-Finding objects they return. This is the "independent pluggable rule
-matchers" half of the Option C architecture; context_builder.py is the
-"single-pass context builder" half.
-
-All 22 rules from the finalized Month 1 taxonomy are active.
+Finding objects they return. context_builder.py builds that context in a
+single tree walk.
 """
 
 from analysis_engine.context_builder import SubmissionContext
@@ -57,7 +54,7 @@ from analysis_engine.rules.m11_rules import (
     RM11_02_BareArithmeticAsCondition,
 )
 
-# All 22 rules from the finalized Month 1 taxonomy, registered by ID.
+# All 22 rules, registered by ID.
 ALL_RULES = [
     RM1_01_LoopBodyOverwrite(),
     RM1_02_ListAccumulationWithoutAppend(),
