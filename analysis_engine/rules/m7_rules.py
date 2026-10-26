@@ -119,13 +119,15 @@ class RM7_02_PrematureAccumulatorRead(Rule):
 
     @staticmethod
     def _feeds_print_call(loop_node, read_node) -> bool:
-        """True if `read_node` is (an argument of) a call to print()
-        anywhere in the loop body."""
+        """True if `read_node` appears anywhere in the arguments of a
+        print() call in the loop body, including inside an f-string or a
+        larger expression such as `print("total:", total)`."""
         for node in ast.walk(loop_node):
             if (isinstance(node, ast.Call)
                     and isinstance(node.func, ast.Name)
                     and node.func.id == "print"):
-                if any(arg is read_node for arg in node.args):
+                args = list(node.args) + [kw.value for kw in node.keywords]
+                if any(sub is read_node for arg in args for sub in ast.walk(arg)):
                     return True
         return False
 

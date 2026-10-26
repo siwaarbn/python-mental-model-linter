@@ -61,6 +61,17 @@ def test_rm1_02_does_not_flag_correct_append():
     assert len(_findings(src, "R-M1-02")) == 0
 
 
+
+def test_rm1_02_does_not_flag_list_rebuilt_and_used_only_inside_loop():
+    src = "row = []\nfor i in range(3):\n    row = [i, i * 2]\n    print(row)\n"
+    assert len(_findings(src, "R-M1-02")) == 0
+
+
+def test_rm1_02_flags_list_rebuilt_but_read_after_loop():
+    src = "items = []\nfor i in range(3):\n    items = [i]\nprint(items)\n"
+    assert len(_findings(src, "R-M1-02")) == 1
+
+
 # ---- R-M2-01 ---------------------------------------------------------
 
 def test_rm2_01_flags_mutable_alias_mutated_then_original_read():
@@ -108,6 +119,24 @@ def test_rm4_01_does_not_flag_when_body_mutates_condition_var_via_method():
     ever appearing as an Assign target.
     """
     src = "queue = [1, 2, 3]\nwhile queue:\n    item = queue.pop()\n    print(item)\n"
+    assert len(_findings(src, "R-M4-01")) == 0
+
+
+def test_rm4_01_does_not_flag_augmented_assignment():
+    """`i += 1` changes the condition variable just like `i = i + 1`."""
+    assert len(_findings("i = 0\nwhile i < 5:\n    i += 1\n", "R-M4-01")) == 0
+
+
+def test_rm4_01_does_not_flag_update_inside_nested_if():
+    src = (
+        "attempts = 0\n"
+        "while attempts < 3:\n"
+        "    guess = input('Guess: ')\n"
+        "    if guess != 'secret':\n"
+        "        attempts += 1\n"
+        "    else:\n"
+        "        break\n"
+    )
     assert len(_findings(src, "R-M4-01")) == 0
 
 
@@ -272,6 +301,18 @@ def test_rm7_02_does_not_flag_debug_print_inside_loop():
     confidence.
     """
     src = "total = 0\nfor n in [1, 2, 3]:\n    total += n\n    print(total)\nprint(total)\n"
+    assert len(_findings(src, "R-M7-02")) == 0
+
+
+
+def test_rm7_02_does_not_flag_running_total_in_fstring_print():
+    src = (
+        "total = 0\n"
+        "for price in [4.99, 12.50]:\n"
+        "    total += price\n"
+        "    print(f'Running total so far: {total}')\n"
+        "print(f'Final total: {total}')\n"
+    )
     assert len(_findings(src, "R-M7-02")) == 0
 
 
