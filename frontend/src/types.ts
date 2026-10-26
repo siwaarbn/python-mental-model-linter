@@ -113,7 +113,7 @@ export interface StudentSummary {
   last_active: string | null;
 }
 
-export interface HinweisItem {
+export interface SuggestionItem {
   id: string;
   type: "reteach" | "extend";
   misconception_id: string | null;

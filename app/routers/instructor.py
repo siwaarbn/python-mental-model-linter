@@ -9,7 +9,7 @@ from app.services.progress_service import compute_student_progress, EXTENSION_SU
 
 router = APIRouter(prefix="/api/instructor", tags=["instructor"])
 
-# A misconception counts as "widespread" (worth a reteach Hinweis) once it
+# A misconception counts as "widespread" (worth a reteach suggestion) once it
 # has shown up for at least this many distinct students. Kept as a module
 # constant rather than buried in the function so it's easy to tune from one
 # place as the class size changes.
@@ -82,8 +82,8 @@ def class_analytics(db: Session = Depends(get_db)):
 def list_students(db: Session = Depends(get_db)):
     """
     Roster view for the instructor to pick a student's progress page from.
-    One query per student's submissions is fine at thesis/class scale;
-    revisit with a join if this ever needs to scale past one cohort.
+    One query per student's submissions is fine for a single class; use a
+    join if this needs to scale further.
     """
     students = db.query(models.User).filter(models.User.role == "student").all()
     total_task_count = db.query(models.Task).count()
@@ -130,10 +130,10 @@ def student_progress_for_instructor(user_id: int, db: Session = Depends(get_db))
     return compute_student_progress(user, submissions, total_task_count)
 
 
-@router.get("/hinweise", response_model=list[schemas.HinweisItem])
-def hinweise(db: Session = Depends(get_db)):
+@router.get("/suggestions", response_model=list[schemas.SuggestionItem])
+def suggestions(db: Session = Depends(get_db)):
     """
-    Instructor 'Hinweise' (suggestion) feed: two kinds of signal.
+    Instructor suggestion feed with two kinds of signal.
 
     - "reteach": a misconception is widespread across the class -> suggests
       revisiting that topic or handing out more material on it.
@@ -142,21 +142,20 @@ def hinweise(db: Session = Depends(get_db)):
       EXTENSION_SUGGESTIONS map, so students who are already doing well
       don't just disappear from the instructor's radar.
 
-    Both are computed fresh on each call rather than stored, so there is no
-    dismissal state server-side yet -- the frontend can track "seen" ids in
-    local component state for now.
+    Both are computed on each call rather than stored. Dismissed suggestions
+    are tracked in the frontend only.
     """
     submissions = (
         db.query(models.Submission).options(joinedload(models.Submission.findings)).all()
     )
     total_task_count = db.query(models.Task).count()
-    items: list[schemas.HinweisItem] = []
+    items: list[schemas.SuggestionItem] = []
 
     # --- Reteach signals: widespread misconceptions across the whole class ---
     for freq in _aggregate(submissions):
         if freq.student_count >= RETEACH_STUDENT_THRESHOLD:
             items.append(
-                schemas.HinweisItem(
+                schemas.SuggestionItem(
                     id=f"reteach-{freq.misconception_id}",
                     type="reteach",
                     misconception_id=freq.misconception_id,
@@ -206,7 +205,7 @@ def hinweise(db: Session = Depends(get_db)):
             message = "No misconceptions have been flagged at all."
 
         items.append(
-            schemas.HinweisItem(
+            schemas.SuggestionItem(
                 id=f"extend-{student.id}",
                 type="extend",
                 misconception_id=top.misconception_id if top else None,

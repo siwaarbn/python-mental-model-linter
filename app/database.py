@@ -1,8 +1,8 @@
 """
 SQLite database setup via SQLAlchemy.
 
-Why SQLite: this is a thesis-scale prototype (one class of students, not
-production traffic), so a single file with zero setup is the right tool.
+Why SQLite: the system is a prototype for a single class, so a single
+file with zero setup is enough.
 Why SQLAlchemy on top of it: it keeps the ORM code backend-agnostic. If
 this ever needs to move to PostgreSQL (e.g. a multi-cohort deployment),
 it is a one-line change to DATABASE_URL below, not a rewrite of models.py.

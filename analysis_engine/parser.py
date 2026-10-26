@@ -60,9 +60,8 @@ def parse_source(code: str, filename: str = "<student_submission>") -> ParseResu
 
 def dump_tree(tree: ast.AST) -> str:
     """
-    Debugging / verification helper. Confirms trees produced by this
-    system use the exact node/field vocabulary (Assign, Name,
-    ctx=Store(), etc.) that the Month 1 AST Pattern Definitions
-    (R-M1-01, R-M1-02, ...) are written against.
+    Debugging helper. Shows the exact node and field names (Assign, Name,
+    ctx=Store(), ...) that the rule patterns in rules/ are written
+    against.
     """
     return ast.dump(tree, indent=2)

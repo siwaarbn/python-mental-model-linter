@@ -115,14 +115,10 @@ class RM8_02_MutatorCallAsValueProducingSubExpression(Rule):
                     method = child.func.attr
                     receiver = child.func.value
 
-                    # Same type-confirmation caveat as R-M8-01: a user-defined
-                    # class can legitimately have a same-named method (e.g. a
-                    # fluent `.add()` that returns `self`) that isn't a real
-                    # None-returning mutator at all. Found as a genuine false
-                    # positive during the Month 4 evaluation sweep -- this
-                    # previously always reported HIGH confidence regardless of
-                    # whether the receiver's type was actually confirmed as a
-                    # builtin list/dict/set.
+                    # As in R-M8-01: a user-defined class may have a method with
+                    # the same name that returns a value (e.g. a fluent `.add()`
+                    # returning `self`), so confidence is HIGH only when the
+                    # receiver is confirmed to be a built-in list, dict or set.
                     scope = scope_by_node.get(id(node), context.module_scope)
                     type_confirmed = (
                         isinstance(receiver, ast.Name)

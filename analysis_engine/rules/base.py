@@ -10,8 +10,7 @@ that it has a rule_id/misconception_id and a check() method.
 
 Adding a new rule never requires touching context_builder.py, other
 rules, or registry.py — only adding a new Rule subclass and, in
-registry.py, appending it to ALL_RULES. This is the concrete payoff of
-the Option C architecture decision from the Month 2 design.
+registry.py, appending it to ALL_RULES.
 """
 
 from abc import ABC, abstractmethod

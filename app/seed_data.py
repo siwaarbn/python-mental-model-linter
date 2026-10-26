@@ -4,12 +4,8 @@ Task bank: one small exercise per misconception (M1-M11).
 target_misconceptions is design intent, not a detection filter -- every
 submission is analyzed against all 22 rules regardless of task.
 
-prompt vs. example: kept as two separate fields on purpose. Early on these
-were combined in one paragraph (e.g. "...separated by commas. e.g.
-greet_n_times('Al', 3) -> 'Hi Al, Hi Al, Hi Al'"), which read as a single
-dense block. `prompt` is now just the instruction; `example` is a fully
-elaborated worked example in its own sentence(s), rendered in its own box
-in the UI.
+prompt vs. example: `prompt` is the instruction; `example` is a worked
+example in full sentences, shown in its own box in the UI.
 
 example_tests: shown to the student when a submission triggers zero
 findings, so a clean scan comes with something concrete to check their

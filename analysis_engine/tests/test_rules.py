@@ -114,9 +114,8 @@ def test_rm4_01_does_not_flag_when_body_updates_condition_var():
 
 def test_rm4_01_does_not_flag_when_body_mutates_condition_var_via_method():
     """
-    Month 4 evaluation fix: `while queue: queue.pop()` was previously a
-    false positive because .pop() changes the loop's truthiness without
-    ever appearing as an Assign target.
+    `while queue: queue.pop()` changes the condition through a method call,
+    not an assignment.
     """
     src = "queue = [1, 2, 3]\nwhile queue:\n    item = queue.pop()\n    print(item)\n"
     assert len(_findings(src, "R-M4-01")) == 0
@@ -169,12 +168,8 @@ def test_rm5_01_does_not_flag_wrapped_return_expression():
 
 def test_rm5_01_does_not_flag_find_first_style_naming():
     """
-    Month 4 evaluation fix: `find_first_negative` with no trailing return
-    is a correct, idiomatic search-and-return-early pattern, structurally
-    identical to the misconception this rule targets. Suppressed based on
-    the function name signalling deliberate single-match search intent --
-    mirroring how _COLLECTION_NAME_HINTS already raises confidence for the
-    opposite intent.
+    `find_first_negative` is a correct search that returns early. Its AST
+    matches the misconception, so the function name decides.
     """
     src = "def find_first_negative(nums):\n    for n in nums:\n        if n < 0:\n            return n\n"
     assert len(_findings(src, "R-M5-01")) == 0
@@ -297,13 +292,7 @@ def test_rm7_02_does_not_flag_when_only_read_after_loop():
 
 def test_rm7_02_does_not_flag_debug_print_inside_loop():
     """
-    Month 4 evaluation fix: the docstring always promised a lower
-    confidence for a print()-fed read inside the loop, but the check
-    never actually implemented it -- `total += n; print(total)` was
-    flagged indistinguishably from a genuine premature-read mistake.
-    Now suppressed outright, since printing a running value is a
-    common, legitimate pattern and the frontend doesn't filter by
-    confidence.
+    Printing a running total inside the loop is a correct pattern.
     """
     src = "total = 0\nfor n in [1, 2, 3]:\n    total += n\n    print(total)\nprint(total)\n"
     assert len(_findings(src, "R-M7-02")) == 0
@@ -347,11 +336,9 @@ def test_rm8_02_does_not_flag_normal_statement_level_call():
 
 def test_rm8_02_lowers_confidence_when_type_not_confirmed():
     """
-    Month 4 evaluation fix: R-M8-02 previously always reported HIGH
-    confidence regardless of type inference, unlike its sibling R-M8-01.
-    A user-defined class with a same-named method (e.g. a fluent `.add()`
-    returning `self`) is a real false-positive risk this brings back in
-    line with R-M8-01's documented, already-accepted behavior.
+    A method with a mutator's name on a user-defined class may return a
+    value, so R-M8-02 reports MEDIUM confidence unless the receiver's type
+    is confirmed.
     """
     src = (
         "class Cart:\n"

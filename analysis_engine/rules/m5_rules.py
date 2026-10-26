@@ -12,15 +12,10 @@ from analysis_engine.rules.base import Rule
 
 _COLLECTION_NAME_HINTS = ("all", "list", "collect", "find_all", "get_all")
 
-# The mirror-image heuristic: function names signalling a deliberate
-# "return the first match" search, which is structurally identical in the
-# AST to the misconception this rule targets (return of a bare loop
-# variable, nothing outside the loop) but is actually idiomatic, correct
-# Python. Found as a genuine false positive during the Month 4 evaluation
-# sweep (e.g. `find_first_negative`). The rule can't tell intent from
-# structure alone, so -- consistent with how _COLLECTION_NAME_HINTS already
-# nudges confidence up -- a name in this list nudges it down instead of
-# fully suppressing, since the ambiguity is real either way.
+# Function names that signal a deliberate "return the first match" search
+# (e.g. `find_first_negative`). Its AST is identical to the misconception
+# this rule targets, so the name is the only signal: the rule is skipped
+# for these names, while _COLLECTION_NAME_HINTS raises confidence.
 _SINGLE_MATCH_NAME_HINTS = ("find_first", "find_one", "search", "first_", "_first")
 
 

@@ -3,8 +3,7 @@ M6 — Scope Misconception  (severity 3 — Deep / threshold)
 
 Faulty model: variables are believed global by default (locals leak
 out); OR, in the opposite direction, globals are believed invisible
-inside a function unless explicitly re-passed (Caceffo et al. B.4 —
-see M6-d in the taxonomy).
+inside a function unless explicitly passed in as a parameter.
 """
 
 import ast
@@ -139,7 +138,7 @@ class RM6_02_ShadowGlobalWithoutDeclaration(Rule):
 class RM6_03_UnnecessaryGlobalReparameterisation(Rule):
     """
     R-M6-03 — Unnecessary global reparameterisation (inaccessibility
-    variant — the "M6-d" overcorrection direction).
+    variant: the opposite direction of M6).
 
     Precondition: FunctionDef whose parameter list includes a name that
     is also a global variable, scoped within a single submission file.
