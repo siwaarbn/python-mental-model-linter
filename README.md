@@ -187,6 +187,6 @@ This is a research prototype, and the thesis discusses its limits in detail. The
 
 ## About
 
-Bachelor thesis by **Siwar Ben Nejma**, Department of Computer Science, TU Darmstadt, 2026. Supervised by Dr. Svana Esche.
+Bachelor thesis by **Siwar Ben Nejma**, Department of Computer Science, TU Darmstadt, 2026, graded 1.0. Supervised by Dr. Svana Esche; second reviewer Dr.-Ing. Guido Rößling.
 
 [LinkedIn](https://www.linkedin.com/in/siwar-ben-nejma-879606403)
